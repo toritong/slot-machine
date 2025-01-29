@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Number Slot Machine</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+</head>
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const SlotMachine = () => {
+            const [drawnNumbers, setDrawnNumbers] = React.useState([]);
+            const [currentNumber, setCurrentNumber] = React.useState(null);
+            const [isSpinning, setIsSpinning] = React.useState(false);
+            const [gameOver, setGameOver] = React.useState(false);
+
+            const generateNumber = () => {
+                if (drawnNumbers.length >= 70) {
+                    setGameOver(true);
+                    return;
+                }
+
+                setIsSpinning(true);
+                
+                const spinInterval = setInterval(() => {
+                    const tempNum = Math.floor(Math.random() * 70) + 1;
+                    setCurrentNumber(tempNum);
+                }, 50);
+
+                setTimeout(() => {
+                    clearInterval(spinInterval);
+                    setIsSpinning(false);
+
+                    let newNumber;
+                    do {
+                        newNumber = Math.floor(Math.random() * 70) + 1;
+                    } while (drawnNumbers.includes(newNumber));
+
+                    setCurrentNumber(newNumber);
+                    setDrawnNumbers(prev => [...prev, newNumber]);
+                }, 1000);
+            };
+
+            const resetGame = () => {
+                setDrawnNumbers([]);
+                setCurrentNumber(null);
+                setGameOver(false);
+            };
+
+            return (
+                <div className="max-w-md mx-auto">
+                    <div className="p-6 rounded-lg bg-gradient-to-b from-purple-700 to-purple-900 shadow-2xl">
+                        <div className="flex flex-col items-center gap-6">
+                            <div className="w-32 h-32 border-4 border-yellow-400 rounded-lg bg-black flex items-center justify-center mb-4">
+                                <span className={`text-6xl font-bold ${isSpinning ? 'text-yellow-400' : 'text-red-500'}`}>
+                                    {currentNumber || '??'}
+                                </span>
+                            </div>
+
+                            <button 
+                                onClick={gameOver ? resetGame : generateNumber}
+                                disabled={isSpinning}
+                                className={`w-32 h-32 rounded-full ${
+                                    gameOver 
+                                        ? 'bg-green-500 hover:bg-green-600' 
+                                        : 'bg-red-500 hover:bg-red-600'
+                                } text-white font-bold text-xl shadow-lg transform transition-transform active:scale-95 focus:outline-none disabled:opacity-50`}
+                            >
+                                {gameOver ? 'Reset' : 'SPIN!'}
+                            </button>
+
+                            <div className="text-center text-white mt-4">
+                                <p className="text-lg">Numbers Drawn: {drawnNumbers.length}/70</p>
+                                {gameOver && (
+                                    <p className="text-yellow-400 mt-2">All numbers have been drawn!</p>
+                                )}
+                            </div>
+
+                            <div className="mt-4 w-full">
+                                <p className="text-white mb-2">Previous Numbers:</p>
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {drawnNumbers.slice(-10).map((num, index) => (
+                                        <span key={index} className="inline-block px-3 py-1 bg-purple-800 text-white rounded-full text-sm">
+                                            {num}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<SlotMachine />, document.getElementById('root'));
+    </script>
+</body>
+</html>
